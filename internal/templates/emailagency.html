@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>Hang Alert - No Response</title>
+</head>
+<body style="margin:0; padding:0; background-color:#fafafa; -webkit-font-smoothing: antialiased;">
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#fafafa" style="background-color:#fafafa;">
+    <tr>
+      <td align="center" style="padding: 40px 16px;">
+
+        <!-- Brand Header -->
+        <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
+          <tr>
+            <td valign="middle" style="padding-right: 10px;">
+              <table role="presentation" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td bgcolor="#0f172a" width="28" height="28" align="center" valign="middle" style="
+                    background-color: #0f172a;
+                    border-radius: 6px;
+                    color: #facc15;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+                    font-size: 14px;
+                    line-height: 28px;
+                  ">&#9888;</td>
+                </tr>
+              </table>
+            </td>
+            <td valign="middle">
+              <span style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 700; color: #0f172a; letter-spacing: -0.02em;">Signoff</span>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Main Card -->
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="max-width: 560px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.02);">
+
+          <!-- Alert Badge -->
+          <tr>
+            <td style="padding: 28px 28px 16px;">
+              <table role="presentation" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td bgcolor="#fef2f2" style="
+                    background-color: #fef2f2;
+                    border: 1px solid #fecaca;
+                    border-radius: 9999px;
+                    padding: 6px 14px;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+                    font-size: 11px;
+                    font-weight: 700;
+                    color: #dc2626;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                  ">&#9888;&nbsp;&nbsp;No Response For 48 Hours</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Title & Description -->
+          <tr>
+            <td style="padding: 0 28px 24px; border-bottom: 1px solid #f1f5f9;">
+              <p style="margin: 0 0 8px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 15px; color: #475569; line-height: 1.5;">
+                A client has not responded to the approval request for over 48 hours.
+              </p>
+              <h1 style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 24px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; line-height: 1.3;">
+                {{.Title}}
+              </h1>
+            </td>
+          </tr>
+
+          <!-- Section Label -->
+          <tr>
+            <td style="padding: 24px 28px 10px;">
+              <span style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #64748b;">
+                Request Details
+              </span>
+            </td>
+          </tr>
+
+          <!-- Structured Details Box -->
+          <tr>
+            <td style="padding: 0 28px 24px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#f8fafc" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+                
+                <!-- Client Row -->
+                <tr>
+                  <td width="80" valign="top" style="padding: 16px 0 8px 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 600; color: #64748b;">
+                    Client:
+                  </td>
+                  <td valign="top" style="padding: 16px 16px 8px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 600; color: #2563eb;">
+                    <a href="mailto:{{.ClientEmail}}" style="color: #2563eb; text-decoration: none;">{{.ClientEmail}}</a>
+                  </td>
+                </tr>
+
+                <!-- Token Row -->
+                <tr>
+                  <td width="80" valign="top" style="padding: 0 0 12px 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 600; color: #64748b;">
+                    Token:
+                  </td>
+                  <td valign="top" style="padding: 0 16px 12px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 13px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; color: #475569; word-break: break-all;">
+                    {{.Token}}
+                  </td>
+                </tr>
+
+                <!-- Divider inside box -->
+                <tr>
+                  <td colspan="2" style="padding: 0 16px;">
+                    <div style="border-top: 1px solid #e2e8f0; width: 100%;"></div>
+                  </td>
+                </tr>
+
+                <!-- Content Row -->
+                <tr>
+                  <td colspan="2" style="padding: 12px 16px 16px 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #334155;">
+                    <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #94a3b8; display: block; margin-bottom: 4px;">Content</span>
+                    {{.Content}}
+                  </td>
+                </tr>
+
+              </table>
+            </td>
+          </tr>
+
+          <!-- Action Notice -->
+          <tr>
+            <td style="padding: 0 28px 24px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#fffbeb" style="background-color: #fffbeb; border: 1px solid #fef3c7; border-radius: 10px;">
+                <tr>
+                  <td style="padding: 14px 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 600; color: #92400e; line-height: 1.4;">
+                    Please contact the client manually to resolve this request.
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Card Footer Context -->
+          <tr>
+            <td style="padding: 16px 28px 24px; border-top: 1px solid #f1f5f9;">
+              <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 12px; color: #94a3b8; line-height: 1.5;">
+                This alert was automatically triggered because the approval SLA window expired without a recorded decision.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+
+        <!-- Global Footer -->
+        <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top: 24px;">
+          <tr>
+            <td align="center">
+              <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 12px; font-weight: 500; color: #94a3b8;">
+                Powered by Signoff
+              </p>
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

@@ -1,0 +1,5 @@
+.env
+signoff
+*.exe
+*.test
+*.out
