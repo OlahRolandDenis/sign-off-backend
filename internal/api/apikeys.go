@@ -54,7 +54,7 @@ func CreateAPIKeyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//ok because returns an interface
-	agencyID, ok := r.Context().Value("agencyID").(int64)
+	agencyID, ok := r.Context().Value(AgencyIDKey).(int64)
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -89,7 +89,7 @@ func ListAPIKeysHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//ok because returns an interface
-	agencyID, ok := r.Context().Value("agencyID").(int64)
+	agencyID, ok := r.Context().Value(AgencyIDKey).(int64)
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -99,6 +99,12 @@ func ListAPIKeysHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Failed to fetch API keys", http.StatusInternalServerError)
 		return
+	}
+
+	for i := range keys {
+		if len(keys[i].Key) > 12 {
+			keys[i].Key = keys[i].Key[:12] + "..."
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -119,7 +125,7 @@ func DeleteAPIKeyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	agencyID, ok := r.Context().Value("agencyID").(int64)
+	agencyID, ok := r.Context().Value(AgencyIDKey).(int64)
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return

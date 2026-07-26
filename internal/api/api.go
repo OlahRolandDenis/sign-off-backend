@@ -1,6 +1,7 @@
 package api
 
 import (
+	"Desktop/signoff/internal/auth"
 	"Desktop/signoff/internal/config"
 
 	"github.com/go-chi/chi/v5"
@@ -16,6 +17,7 @@ func New(cfg *config.Config) *API {
 	var api API
 	api.Router = chi.NewRouter()
 	api.Config = cfg
+	auth.JWTSecret = cfg.JWTSecret
 
 	api.setUpMiddleware()
 	api.setUpRoutes()
@@ -33,6 +35,10 @@ func (api *API) setUpRoutes() {
 	api.Router.Get("/health", HealthHandler)
 	api.Router.Post("/api/register", Register)
 	api.Router.Post("/api/login", Login)
+
+	api.Router.With(AuthMiddleware).Post("/api/logout", Logout)
+	api.Router.With(AuthMiddleware).Get("/api/account", GetAccount)
+	api.Router.With(AuthMiddleware).Delete("/api/account", DeleteAccount)
 
 	api.Router.Get("/approve/{token}", ShowApprovePage)
 	api.Router.Post("/approve/{token}/decision", ProcessDecision)

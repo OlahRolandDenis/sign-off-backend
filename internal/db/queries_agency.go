@@ -48,3 +48,40 @@ func GetAgencyByEmail(ctx context.Context, email string) (*models.Agency, error)
 
 	return &ma, nil
 }
+
+func GetAgencyByID(ctx context.Context, id int64) (*models.Agency, error) {
+	var query = `SELECT * FROM agencies WHERE id=$1`
+	row := Pool.QueryRow(ctx, query, id)
+
+	var idul int64
+	var name string
+	var emailul string
+	var password_hash string
+	var plan string
+	var created_at time.Time
+
+	err := row.Scan(&idul, &emailul, &name, &password_hash, &plan, &created_at)
+	if err != nil {
+		log.Printf("Error finding agency id: %v", err)
+		return nil, err
+	}
+	var ma models.Agency
+	ma.CreatedAt = created_at
+	ma.Email = emailul
+	ma.ID = idul
+	ma.Name = name
+	ma.PasswordHash = password_hash
+	ma.Plan = plan
+
+	return &ma, nil
+}
+
+func DeleteAgency(ctx context.Context, id int64) error {
+	var query = `SELECT * FROM agencies WHERE id=$1`
+	_, err := Pool.Exec(ctx, query, id)
+	if err != nil {
+		log.Printf("Error deleting agency by id: %v", err)
+		return err
+	}
+	return nil
+}

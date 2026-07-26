@@ -12,6 +12,7 @@ type Config struct {
 	DataBase_URL string
 	ReSend_KEY   string
 	Base_URL     string
+	JWTSecret    string
 }
 
 func Load() Config {
@@ -41,6 +42,11 @@ func Load() Config {
 	cf.Base_URL = os.Getenv("BASE_URL")
 	if cf.Base_URL == "" {
 		log.Fatal("error no Base_URL")
+	}
+
+	cf.JWTSecret = os.Getenv("JWT_SECRET")
+	if cf.JWTSecret == "" {
+		log.Fatal("error no JWTSecret")
 	}
 
 	return cf
