@@ -101,6 +101,12 @@ func ListAPIKeysHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for i := range keys {
+		if len(keys[i].Key) > 12 {
+			keys[i].Key = keys[i].Key[:12] + "..."
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	data, err := json.Marshal(keys)
