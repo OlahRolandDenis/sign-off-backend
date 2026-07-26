@@ -33,6 +33,7 @@ func GetAPIKeys(ctx context.Context, agencyID int64) ([]models.APIKey, error) {
 		var k models.APIKey
 		err = rows.Scan(&k.ID, &k.AgencyID, &k.Key, &k.Name, &k.CreatedAt, &k.LastUsed)
 		if err != nil {
+			log.Printf("❌ Scan error: %v", err)
 			continue
 		}
 		keys = append(keys, k)
