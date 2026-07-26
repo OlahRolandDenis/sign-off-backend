@@ -19,12 +19,12 @@ type Test struct {
 }
 
 type DataAgencyR struct {
-	Name       string
-	Email      string
-	Plan       string
+	Name       string    `json:"name"`
+	Email      string    `json:"email"`
+	Plan       string    `json:"plan"`
 	Created_at time.Time `json:"created_at"`
-	AgencyID   int64
-	Api_keys   int `json:"api_keys"`
+	AgencyID   int64     `json:"agency_id"`
+	Api_keys   int       `json:"api_keys"`
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {

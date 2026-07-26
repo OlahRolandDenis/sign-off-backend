@@ -85,3 +85,10 @@ func DeleteAgency(ctx context.Context, id int64) error {
 	}
 	return nil
 }
+
+func CountAPIKeys(ctx context.Context, agencyID int64) (int, error) {
+	var count int
+	query := `SELECT COUNT(*) FROM api_keys WHERE agency_id = $1`
+	err := Pool.QueryRow(ctx, query, agencyID).Scan(&count)
+	return count, err
+}

@@ -4,6 +4,7 @@ import (
 	"Desktop/signoff/internal/auth"
 	"Desktop/signoff/internal/db"
 	"context"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -29,6 +30,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			token := strings.TrimPrefix(authHeader, "Bearer ")
 			id, ok := auth.ValidateJWT(token)
 			if ok == nil {
+				log.Printf("✅ AuthMiddleware: setting agencyID = %d", id)
 				ctx := context.WithValue(r.Context(), AgencyIDKey, id)
 				next.ServeHTTP(w, r.WithContext(ctx))
 				return

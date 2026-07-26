@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -14,9 +15,9 @@ import (
 )
 
 type DataAPI struct {
-	ID   int64
-	Key  string
-	Name string
+	ID   int64  `json:"id"`
+	Key  string `json:"key"`
+	Name string `json:"name"`
 }
 
 type DataDel struct {
@@ -60,6 +61,18 @@ func CreateAPIKeyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Verifică numărul de chei existente
+	count, err := db.CountAPIKeys(r.Context(), agencyID)
+	if err != nil {
+		http.Error(w, "Failed to verify key limit", http.StatusInternalServerError)
+		return
+	}
+
+	if count >= 20 {
+		http.Error(w, "Maximum 20 API keys allowed per agency", http.StatusBadRequest)
+		return
+	}
+
 	var key = GenerateAPIKey()
 	id, err := db.CreateAPIKey(r.Context(), agencyID, re.Name, key)
 	if err != nil {
@@ -94,12 +107,15 @@ func ListAPIKeysHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
+	log.Printf("🔍 ListAPIKeysHandler: agencyID = %d", agencyID)
 
 	keys, err := db.GetAPIKeys(r.Context(), agencyID)
 	if err != nil {
 		http.Error(w, "Failed to fetch API keys", http.StatusInternalServerError)
 		return
 	}
+
+	log.Printf("✅ Found %d keys", len(keys))
 
 	for i := range keys {
 		if len(keys[i].Key) > 12 {

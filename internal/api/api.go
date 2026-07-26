@@ -26,6 +26,7 @@ func New(cfg *config.Config) *API {
 }
 
 func (api *API) setUpMiddleware() {
+	api.Router.Use(RateLimitMiddleware())
 	api.Router.Use(middleware.Logger)
 	api.Router.Use(middleware.Recoverer)
 	api.Router.Use(corsMiddleware)
