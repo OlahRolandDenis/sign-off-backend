@@ -8,13 +8,17 @@ import (
 	"strings"
 )
 
+type contextKey string
+
+const AgencyIDKey contextKey = "agencyID"
+
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		apiKey := r.Header.Get("X-API-Key")
 		if apiKey != "" {
 			id, err := db.ValidateAPIKey(r.Context(), apiKey)
 			if err == nil {
-				ctx := context.WithValue(r.Context(), "agencyID", id)
+				ctx := context.WithValue(r.Context(), AgencyIDKey, id)
 				next.ServeHTTP(w, r.WithContext(ctx))
 				return
 			}
@@ -25,7 +29,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			token := strings.TrimPrefix(authHeader, "Bearer ")
 			id, ok := auth.Store.ValidateToken(token)
 			if ok == true {
-				ctx := context.WithValue(r.Context(), "agencyID", id)
+				ctx := context.WithValue(r.Context(), AgencyIDKey, id)
 				next.ServeHTTP(w, r.WithContext(ctx))
 				return
 			}

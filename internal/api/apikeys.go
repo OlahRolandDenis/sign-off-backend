@@ -54,7 +54,7 @@ func CreateAPIKeyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//ok because returns an interface
-	agencyID, ok := r.Context().Value("agencyID").(int64)
+	agencyID, ok := r.Context().Value(AgencyIDKey).(int64)
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -89,7 +89,7 @@ func ListAPIKeysHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//ok because returns an interface
-	agencyID, ok := r.Context().Value("agencyID").(int64)
+	agencyID, ok := r.Context().Value(AgencyIDKey).(int64)
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -125,7 +125,7 @@ func DeleteAPIKeyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	agencyID, ok := r.Context().Value("agencyID").(int64)
+	agencyID, ok := r.Context().Value(AgencyIDKey).(int64)
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
