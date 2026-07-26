@@ -4,11 +4,10 @@ import (
 	"Desktop/signoff/internal/auth"
 	"Desktop/signoff/internal/db"
 	"Desktop/signoff/internal/models"
-	"crypto/rand"
-	"encoding/base64"
 	"encoding/json"
 	"io"
 	"net/http"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -19,10 +18,13 @@ type Test struct {
 	AgencyID int64
 }
 
-func GenerateToken() string {
-	b := make([]byte, 32)
-	rand.Read(b)
-	return base64.URLEncoding.EncodeToString(b)
+type DataAgencyR struct {
+	Name       string
+	Email      string
+	Plan       string
+	Created_at time.Time `json:"created_at"`
+	AgencyID   int64
+	Api_keys   int `json:"api_keys"`
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -55,7 +57,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token := auth.Store.CreateToken(agency.ID)
+	token, err := auth.GenerateJWT(agency.ID)
+	if err != nil {
+		http.Error(w, "Error creating token", http.StatusBadRequest)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -118,5 +124,79 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write(data)
+
+}
+
+func Logout(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func GetAccount(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Error bad method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	agencyID, ok := r.Context().Value(AgencyIDKey).(int64)
+	if ok == false {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	rez, err := db.GetAgencyByID(r.Context(), agencyID)
+	if err != nil {
+		http.Error(w, "Agency not found", http.StatusNotFound)
+		return
+	}
+
+	apikeys, err := db.GetAPIKeys(r.Context(), agencyID)
+	if err != nil {
+		http.Error(w, "Error getting apikeys", http.StatusBadRequest)
+		return
+	}
+
+	var nr int
+	nr = len(apikeys)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	var t DataAgencyR
+	t.AgencyID = rez.ID
+	t.Api_keys = nr
+	t.Created_at = rez.CreatedAt
+	t.Email = rez.Email
+	t.Name = rez.Name
+	t.Plan = rez.Plan
+
+	data, err := json.Marshal(t)
+	if err != nil {
+		http.Error(w, "Couldnt make json", http.StatusBadRequest)
+		return
+	}
+
+	w.Write(data)
+
+}
+
+func DeleteAccount(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		http.Error(w, "Error bad method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	agencyID, ok := r.Context().Value(AgencyIDKey).(int64)
+	if ok == false {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	err := db.DeleteAgency(r.Context(), agencyID)
+	if err != nil {
+		http.Error(w, "Failed to delete account", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 
 }

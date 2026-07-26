@@ -27,8 +27,8 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader != "" && strings.HasPrefix(authHeader, "Bearer ") {
 			token := strings.TrimPrefix(authHeader, "Bearer ")
-			id, ok := auth.Store.ValidateToken(token)
-			if ok == true {
+			id, ok := auth.ValidateJWT(token)
+			if ok == nil {
 				ctx := context.WithValue(r.Context(), AgencyIDKey, id)
 				next.ServeHTTP(w, r.WithContext(ctx))
 				return
