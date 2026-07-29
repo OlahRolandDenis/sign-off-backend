@@ -44,7 +44,7 @@ func GetAPIKeys(ctx context.Context, agencyID int64) ([]models.APIKey, error) {
 
 func DeleteAPIKey(ctx context.Context, id, agencyID int64) error {
 	var query = `DELETE FROM api_keys WHERE id=$1 and agency_id=$2`
-	result, err := Pool.Exec(ctx, query, id)
+	result, err := Pool.Exec(ctx, query, id, agencyID)
 
 	if err != nil {
 		log.Printf("Error deleting id: %v", err)

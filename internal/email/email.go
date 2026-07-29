@@ -137,7 +137,7 @@ func SendCallbackFailedEmail(to, token, decision, errMsg string) error {
 		return fmt.Errorf("No key")
 	}
 
-	tmp, err := template.ParseFiles("internal/templates/callback-failed.html")
+	tmp, err := template.ParseFiles("internal/templates/callback_failed.html")
 	if err != nil {
 		log.Print("Error parsing html")
 		return err

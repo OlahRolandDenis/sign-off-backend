@@ -45,6 +45,8 @@ func ValidateJWT(tokenString string) (int64, error) {
 	}
 
 	agencyID, ok := claims["agency_id"].(float64)
-
+	if !ok {
+		return 0, fmt.Errorf("invalid agency_id claim")
+	}
 	return int64(agencyID), nil
 }
