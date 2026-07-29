@@ -98,15 +98,21 @@ func ProcessDecision(w http.ResponseWriter, r *http.Request) {
 	var des = r.FormValue("decision")
 	var com = r.FormValue("comment")
 	var ctx = context.Background()
+	var expiresAt time.Time
 
-	var q = `SELECT a.status, a.callback_url, ag.email FROM approvals a JOIN agencies ag on ag.id=a.agency_id WHERE a.token=$1`
+	if des != "approved" && des != "rejected" {
+		http.Error(w, "Invalid decision value", http.StatusBadRequest)
+		return
+	}
+
+	var q = `SELECT a.status, a.callback_url, a.expires_at, ag.email FROM approvals a JOIN agencies ag on ag.id=a.agency_id WHERE a.token=$1`
 	var pool = db.Pool
 	var status string
 	var callbackurl string
 	var agencyemail string
 
 	rez := pool.QueryRow(ctx, q, token)
-	err = rez.Scan(&status, &callbackurl, &agencyemail)
+	err = rez.Scan(&status, &callbackurl, &expiresAt, &agencyemail)
 	if err != nil {
 		http.Error(w, "Approval not found", http.StatusNotFound)
 		return
@@ -117,8 +123,13 @@ func ProcessDecision(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	q = `UPDATE approvals SET decision=$1, comment=$2, status=$3 WHERE token=$4`
-	_, err = pool.Exec(ctx, q, des, com, des, token)
+	if time.Now().After(expiresAt) {
+		http.Error(w, "Approval expired", http.StatusGone)
+		return
+	}
+
+	q = `UPDATE approvals SET decision=$1, comment=$2, status=$3, decided_at=$4 WHERE token=$4`
+	_, err = pool.Exec(ctx, q, des, com, des, time.Now(), token)
 	if err != nil {
 		http.Error(w, "Failed to save decision", http.StatusInternalServerError)
 		return
