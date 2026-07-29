@@ -128,7 +128,7 @@ func ProcessDecision(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	q = `UPDATE approvals SET decision=$1, comment=$2, status=$3, decided_at=$4 WHERE token=$4`
+	q = `UPDATE approvals SET decision=$1, comment=$2, status=$3, decided_at=$4 WHERE token=$5`
 	_, err = pool.Exec(ctx, q, des, com, des, time.Now(), token)
 	if err != nil {
 		http.Error(w, "Failed to save decision", http.StatusInternalServerError)
