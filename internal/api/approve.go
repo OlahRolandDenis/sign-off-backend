@@ -1,6 +1,7 @@
 package api
 
 import (
+	"Desktop/signoff/internal/callback"
 	"Desktop/signoff/internal/db"
 	"Desktop/signoff/internal/email"
 	"context"
@@ -155,7 +156,7 @@ func ProcessDecision(w http.ResponseWriter, r *http.Request) {
 
 	if callbackurl != "" {
 		go func() {
-			err := SendCallback(callbackurl, token, des, com)
+			err := callback.SendCallback(callbackurl, token, des, com)
 			if err != nil {
 				log.Printf("Callback failed: %v", err)
 				email.SendCallbackFailedEmail(agencyemail, token, des, err.Error())

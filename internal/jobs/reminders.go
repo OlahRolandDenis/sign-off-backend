@@ -1,6 +1,7 @@
 package jobs
 
 import (
+	"Desktop/signoff/internal/callback"
 	"Desktop/signoff/internal/db"
 	"Desktop/signoff/internal/email"
 	"context"
@@ -56,7 +57,7 @@ func checkPendingApprovals() {
 	}
 
 	q = `
-    SELECT a.title, a.content, a.token, a.client_email, ag.email 
+    SELECT a.title, a.content, a.token, a.client_email, a.callback_url, ag.email 
     FROM approvals a 
     JOIN agencies ag ON a.agency_id = ag.id 
     WHERE a.status = 'pending' 
@@ -76,8 +77,9 @@ func checkPendingApprovals() {
 		var to string
 		var token string
 		var cemail string
+		var callback_url string
 
-		err = rows2.Scan(&title, &content, &token, &cemail, &to)
+		err = rows2.Scan(&title, &content, &token, &cemail, &callback_url, &to)
 		if err != nil {
 			log.Printf("Error extracting values: %v", err)
 		}
@@ -85,6 +87,16 @@ func checkPendingApprovals() {
 		err = email.SendEmailAgency(title, content, cemail, token, to)
 		if err != nil {
 			log.Printf("Error sending reminder email: %v", err)
+		}
+
+		if callback_url != "" {
+			go func() {
+				err := callback.SendCallback(callback_url, token, "expired", "No response within 48 hours")
+				if err != nil {
+					log.Printf("Callback failed: %v", err)
+					email.SendCallbackFailedEmail(to, token, "expired", err.Error())
+				}
+			}()
 		}
 
 		var q = `UPDATE approvals SET hang_alert_sent=true WHERE token=$1`
