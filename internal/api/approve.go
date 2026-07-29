@@ -2,6 +2,7 @@ package api
 
 import (
 	"Desktop/signoff/internal/db"
+	"Desktop/signoff/internal/email"
 	"context"
 	"html/template"
 	"log"
@@ -98,13 +99,14 @@ func ProcessDecision(w http.ResponseWriter, r *http.Request) {
 	var com = r.FormValue("comment")
 	var ctx = context.Background()
 
-	var q = `SELECT a.status, a.callback_url FROM approvals a WHERE a.token=$1`
+	var q = `SELECT a.status, a.callback_url, ag.email FROM approvals a JOIN agencies ag on ag.id=a.agency_id WHERE a.token=$1`
 	var pool = db.Pool
 	var status string
 	var callbackurl string
+	var agencyemail string
 
 	rez := pool.QueryRow(ctx, q, token)
-	err = rez.Scan(&status, &callbackurl)
+	err = rez.Scan(&status, &callbackurl, &agencyemail)
 	if err != nil {
 		http.Error(w, "Approval not found", http.StatusNotFound)
 		return
@@ -145,6 +147,7 @@ func ProcessDecision(w http.ResponseWriter, r *http.Request) {
 			err := SendCallback(callbackurl, token, des, com)
 			if err != nil {
 				log.Printf("Callback failed: %v", err)
+				email.SendCallbackFailedEmail(agencyemail, token, des, err.Error())
 			}
 		}()
 	}

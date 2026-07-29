@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Callback Failed</title>
+</head>
+<body style="margin:0;padding:0;background-color:#fafafa;">
+    <table width="100%" cellpadding="0" cellspacing="0" bgcolor="#fafafa">
+        <tr>
+            <td align="center" style="padding:40px 16px;">
+                <table cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="max-width:560px;border-radius:16px;border:1px solid #e2e8f0;">
+                    <tr>
+                        <td style="padding:28px;">
+                            <h1 style="color:#dc2626;">Approval Callback Failed</h1>
+                            <p style="color:#475569;">We could NOT resume your n8n workflow after client approval.</p>
+                            <hr style="border-top:1px solid #e2e8f0;">
+                            <p><strong>Token:</strong> {{.Token}}</p>
+                            <p><strong>Decision:</strong> {{.Decision}}</p>
+                            <p><strong>Error:</strong> {{.Message}}</p>
+                            <p>Please check your n8n workflow manually.</p>
+                            <hr style="border-top:1px solid #e2e8f0;">
+                            <p style="text-align:center;color:#94a3b8;">Powered by NodGo</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
