@@ -5,7 +5,10 @@ import (
 	"Desktop/signoff/internal/email"
 	"Desktop/signoff/internal/models"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -14,6 +17,13 @@ import (
 
 	"github.com/google/uuid"
 )
+
+func computeRequestHash(agencyID int64, req models.WebHookRequest) string {
+	day := time.Now().UTC().Truncate(24 * time.Hour).Unix()
+	data := fmt.Sprintf("%d|%s|%s|%s|%s|%d", agencyID, req.Title, req.Content, req.ClientEmail, req.CallbackURL, day)
+	hash := sha256.Sum256([]byte(data))
+	return hex.EncodeToString(hash[:])
+}
 
 func WebhookHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -64,6 +74,8 @@ func WebhookHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var hash = computeRequestHash(agencyID, response)
+
 	var token = uuid.New().String()
 
 	var model models.Approval
@@ -76,13 +88,21 @@ func WebhookHandler(w http.ResponseWriter, r *http.Request) {
 	model.Status = "pending"
 	model.CreatedAt = time.Now().UTC() //Fortare UTC
 	model.ExpiresAt = time.Now().UTC().Add(48 * time.Hour)
+	model.RequestHash = hash
 
-	var query = `INSERT INTO approvals (token, callback_url, client_email, agency_id, title, content, status, created_at, expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
+	var existingToken string
+	var query = `INSERT INTO approvals (
+        token, callback_url, client_email, agency_id, title, content,
+        status, created_at, expires_at, request_hash
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    ON CONFLICT (request_hash) DO UPDATE SET request_hash = EXCLUDED.request_hash
+    RETURNING token`
 
 	var pool = db.Pool
 	ctx := context.Background()
 
-	_, err = pool.Exec(ctx, query, model.Token, model.CallbackURL, model.ClientEmail, model.AgencyID, model.Title, model.Content, model.Status, model.CreatedAt, model.ExpiresAt)
+	row := pool.QueryRow(ctx, query, model.Token, model.CallbackURL, model.ClientEmail, model.AgencyID, model.Title, model.Content, model.Status, model.CreatedAt, model.ExpiresAt, model.RequestHash)
+	err = row.Scan(&existingToken)
 	if err != nil {
 		http.Error(w, "Failed to save approval", http.StatusInternalServerError)
 		return
@@ -90,14 +110,18 @@ func WebhookHandler(w http.ResponseWriter, r *http.Request) {
 
 	baseURL := os.Getenv("BASE_URL")
 	if baseURL == "" {
-		baseURL = "http://localhost:8080"
+		baseURL = "https://nodgo.app"
 	}
-	apvURL := baseURL + "/approve/" + token
-	err = email.SendEmail(apvURL, response.Title, response.Content, response.ClientEmail)
-	if err != nil {
-		log.Printf("Email error: %v", err)
-		http.Error(w, "Failed to send email", http.StatusInternalServerError)
-		return
+
+	if existingToken != token {
+		token = existingToken
+	} else {
+
+		apvURL := baseURL + "/approve/" + token
+		err = email.SendEmail(apvURL, response.Title, response.Content, response.ClientEmail)
+		if err != nil {
+			log.Printf("Email error: %v", err)
+		}
 	}
 
 	var rez models.WebHookResponse

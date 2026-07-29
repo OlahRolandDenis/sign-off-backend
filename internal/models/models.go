@@ -18,6 +18,7 @@ type Approval struct {
 	ExpiresAt     time.Time `json:"expires_at"`
 	NudgeSent     bool      `json:"nudge_sent"`
 	HangAlertSent bool      `json:"hang_alert_sent"`
+	RequestHash   string    `json:"request_hash"` // ← NOU
 }
 
 type WebHookRequest struct {
