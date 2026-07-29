@@ -61,7 +61,7 @@ func checkPendingApprovals() {
     JOIN agencies ag ON a.agency_id = ag.id 
     WHERE a.status = 'pending' 
     AND a.hang_alert_sent = false 
-    AND a.created_at < NOW() - INTERVAL '48 hours' 
+    AND a.created_at < NOW() - INTERVAL '47 hours' 
     LIMIT 100
 `
 	rows2, err := db.Pool.Query(ctx, q)
@@ -77,7 +77,7 @@ func checkPendingApprovals() {
 		var token string
 		var cemail string
 
-		err = rows2.Scan(&title, &content, &to, &token, &cemail)
+		err = rows2.Scan(&title, &content, &token, &cemail, &to)
 		if err != nil {
 			log.Printf("Error extracting values: %v", err)
 		}

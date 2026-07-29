@@ -77,7 +77,7 @@ func GetAgencyByID(ctx context.Context, id int64) (*models.Agency, error) {
 }
 
 func DeleteAgency(ctx context.Context, id int64) error {
-	var query = `SELECT * FROM agencies WHERE id=$1`
+	var query = `DELETE * FROM agencies WHERE id=$1`
 	_, err := Pool.Exec(ctx, query, id)
 	if err != nil {
 		log.Printf("Error deleting agency by id: %v", err)
