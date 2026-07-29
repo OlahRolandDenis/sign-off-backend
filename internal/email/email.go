@@ -107,7 +107,7 @@ func SendEmailAgency(title, content, clientemail, token, to string) error {
 	client := resend.NewClient(key)
 
 	params := &resend.SendEmailRequest{
-		From:    "onboarding@resend.dev",
+		From:    "NodGo <approvals@nodgo.app>",
 		To:      destinatari,
 		Subject: "Client hasn't approved: " + title,
 		Html:    htmlString,

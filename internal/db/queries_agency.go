@@ -92,3 +92,17 @@ func CountAPIKeys(ctx context.Context, agencyID int64) (int, error) {
 	err := Pool.QueryRow(ctx, query, agencyID).Scan(&count)
 	return count, err
 }
+
+func CountApprovalsInLast30Days(ctx context.Context, agencyID int64) (int, error) {
+	var count int
+	query := `SELECT COUNT(*) FROM approvals WHERE agency_id = $1 AND created_at > NOW() - INTERVAL '30 days'`
+	err := Pool.QueryRow(ctx, query, agencyID).Scan(&count)
+	return count, err
+}
+
+func GetPlan(ctx context.Context, agencyID int64) (string, error) {
+	var plan string
+	query := `SELECT plan FROM agencies WHERE id = $1`
+	err := Pool.QueryRow(ctx, query, agencyID).Scan(&plan)
+	return plan, err
+}

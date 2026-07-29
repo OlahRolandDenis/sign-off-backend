@@ -33,6 +33,24 @@ func WebhookHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	plan, err := db.GetPlan(r.Context(), agencyID)
+	if err != nil {
+		http.Error(w, "Failed to verify plan", http.StatusInternalServerError)
+		return
+	}
+
+	if plan == "free" {
+		count, err := db.CountApprovalsInLast30Days(r.Context(), agencyID)
+		if err != nil {
+			http.Error(w, "Failed to count approvals", http.StatusInternalServerError)
+			return
+		}
+		if count >= 50 {
+			http.Error(w, "Free plan limit reached (50 approvals/month). Please upgrade to continue.", http.StatusPaymentRequired)
+			return
+		}
+	}
+
 	var response models.WebHookRequest
 
 	err = json.Unmarshal(res, &response)
