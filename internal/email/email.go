@@ -10,6 +10,10 @@ import (
 	"github.com/resend/resend-go/v2"
 )
 
+type emailV struct {
+	URLV string
+}
+
 type data_failed struct {
 	Token    string
 	Decision string
@@ -165,6 +169,54 @@ func SendCallbackFailedEmail(to, token, decision, errMsg string) error {
 		From:    "NodGo <approvals@nodgo.app>",
 		To:      destinatari,
 		Subject: "Approval callback failed",
+		Html:    htmlString,
+	}
+
+	_, err = client.Emails.Send(params)
+	if err != nil {
+		log.Printf("Error sending email: %v", err)
+		return err
+	}
+
+	log.Printf("Email sent to %s", to)
+	return nil
+}
+
+func SendVerificationEmail(to, token string) error {
+	key := os.Getenv("RESEND_API_KEY")
+	if key == "" {
+		log.Print("Error no ReSend_KEY")
+		return fmt.Errorf("No key")
+	}
+
+	URLTOKEN := os.Getenv("BASE_URL") + "/api/verify?token=" + token
+
+	tmp, err := template.ParseFiles("internal/templates/verify_email.html")
+	if err != nil {
+		log.Print("Error parsing html")
+		return err
+	}
+
+	var de emailV
+	de.URLV = URLTOKEN
+
+	var body bytes.Buffer
+	err = tmp.Execute(&body, de)
+	if err != nil {
+		log.Print("Error saving html")
+		return err
+	}
+
+	var destinatari []string
+	destinatari = append(destinatari, to)
+
+	htmlString := body.String()
+	client := resend.NewClient(key)
+
+	params := &resend.SendEmailRequest{
+		From:    "NodGo <approvals@nodgo.app>",
+		To:      destinatari,
+		Subject: "Verify your email",
 		Html:    htmlString,
 	}
 

@@ -36,6 +36,7 @@ func (api *API) setUpMiddleware() {
 func (api *API) setUpRoutes() {
 	// 1. Public routes
 	api.Router.Get("/health", HealthHandler)
+	api.Router.Get("/api/verify", VerifyEmail)
 
 	// 2. Approve routes (public)
 	api.Router.Get("/approve/{token}", ShowApprovePage)

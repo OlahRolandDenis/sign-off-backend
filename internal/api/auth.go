@@ -3,12 +3,15 @@ package api
 import (
 	"Desktop/signoff/internal/auth"
 	"Desktop/signoff/internal/db"
+	"Desktop/signoff/internal/email"
 	"Desktop/signoff/internal/models"
 	"encoding/json"
+	"html/template"
 	"io"
 	"net/http"
 	"time"
 
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -54,6 +57,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	err = bcrypt.CompareHashAndPassword([]byte(agency.PasswordHash), []byte(re.Password))
 	if err != nil {
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		return
+	}
+
+	if !agency.EmailVerified {
+		http.Error(w, "Please verify your email first. Check your inbox.", http.StatusForbidden)
 		return
 	}
 
@@ -109,6 +117,16 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error creating New Agency", http.StatusBadRequest)
 		return
 	}
+
+	verifyToken := uuid.New().String()
+	var query = `UPDATE agencies SET verification_token=$1 WHERE id=$2`
+	_, err = db.Pool.Exec(r.Context(), query, verifyToken, id)
+	if err == nil {
+		go func() {
+			_ = email.SendVerificationEmail(re.Email, verifyToken)
+		}()
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 
@@ -198,5 +216,39 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+
+}
+
+func VerifyEmail(w http.ResponseWriter, r *http.Request) {
+	token := r.URL.Query().Get("token")
+	if token == "" {
+		http.Error(w, "Missing verification token", http.StatusBadRequest)
+		return
+	}
+	var existingToken string
+
+	var query = `Select verification_token FROM agencies WHERE verification_token=$1`
+	err := db.Pool.QueryRow(r.Context(), query, token).Scan(&existingToken)
+	if err != nil {
+		http.Error(w, "Invalid or expired token", http.StatusBadRequest)
+		return
+	}
+
+	query = `UPDATE agencies SET email_verified=true, verified_at = NOW(), verification_token = NULL WHERE verification_token = $1`
+	_, err = db.Pool.Exec(r.Context(), query, token)
+	if err != nil {
+		http.Error(w, "Failed to verify email", http.StatusInternalServerError)
+		return
+	}
+
+	tmpl, err := template.ParseFiles("internal/templates/verify_success.html")
+	if err != nil {
+		http.Error(w, "Failed to load page", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(http.StatusOK)
+	tmpl.Execute(w, nil)
 
 }

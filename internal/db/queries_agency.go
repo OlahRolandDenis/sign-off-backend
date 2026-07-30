@@ -3,6 +3,7 @@ package db
 import (
 	"Desktop/signoff/internal/models"
 	"context"
+	"database/sql"
 	"log"
 	"time"
 )
@@ -31,8 +32,11 @@ func GetAgencyByEmail(ctx context.Context, email string) (*models.Agency, error)
 	var password_hash string
 	var plan string
 	var created_at time.Time
+	var emailverified bool
+	var verificationtoken sql.NullString
+	var verifiedat sql.NullTime
 
-	err := row.Scan(&id, &emailul, &name, &password_hash, &plan, &created_at)
+	err := row.Scan(&id, &emailul, &name, &password_hash, &plan, &created_at, &emailverified, &verificationtoken, &verifiedat)
 	if err != nil {
 		log.Printf("Error finding agency id: %v", err)
 		return nil, err
@@ -45,6 +49,19 @@ func GetAgencyByEmail(ctx context.Context, email string) (*models.Agency, error)
 	ma.Name = name
 	ma.PasswordHash = password_hash
 	ma.Plan = plan
+	ma.EmailVerified = emailverified
+
+	if verificationtoken.Valid {
+		ma.VerificationToken = &verificationtoken.String
+	} else {
+		ma.VerificationToken = nil
+	}
+
+	if verifiedat.Valid {
+		ma.VerifiedAt = &verifiedat.Time
+	} else {
+		ma.VerifiedAt = nil
+	}
 
 	return &ma, nil
 }
@@ -59,8 +76,11 @@ func GetAgencyByID(ctx context.Context, id int64) (*models.Agency, error) {
 	var password_hash string
 	var plan string
 	var created_at time.Time
+	var emailverified bool
+	var verificationtoken sql.NullString
+	var verifiedat sql.NullTime
 
-	err := row.Scan(&idul, &emailul, &name, &password_hash, &plan, &created_at)
+	err := row.Scan(&idul, &emailul, &name, &password_hash, &plan, &created_at, &emailverified, &verificationtoken, &verifiedat)
 	if err != nil {
 		log.Printf("Error finding agency id: %v", err)
 		return nil, err
@@ -72,6 +92,20 @@ func GetAgencyByID(ctx context.Context, id int64) (*models.Agency, error) {
 	ma.Name = name
 	ma.PasswordHash = password_hash
 	ma.Plan = plan
+
+	ma.EmailVerified = emailverified
+
+	if verificationtoken.Valid {
+		ma.VerificationToken = &verificationtoken.String
+	} else {
+		ma.VerificationToken = nil
+	}
+
+	if verifiedat.Valid {
+		ma.VerifiedAt = &verifiedat.Time
+	} else {
+		ma.VerifiedAt = nil
+	}
 
 	return &ma, nil
 }
