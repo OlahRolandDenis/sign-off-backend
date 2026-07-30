@@ -241,7 +241,7 @@ func VerifyEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl, err := template.ParseFiles("internal/templates/verify_success.html")
+	tmpl, err := template.ParseFiles("internal/templates/verify_succes.html")
 	if err != nil {
 		http.Error(w, "Failed to load page", http.StatusInternalServerError)
 		return
